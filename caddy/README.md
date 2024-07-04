@@ -1,10 +1,14 @@
 # caddy webserver
 official page: https://caddyserver.com/
 
-1. [build arguments](#build-arguments)
-2. [compressed knowledge](#compressed-knowledge)
+1. [steps](#steps)
+2. [arguments](#build-arguments)
+3. [compressed knowledge](#compressed-knowledge)
    1. [php fpm](#php-fpm-fastcgi)
-   2. [using environment variables](#using-environment-variables)
+   2. [environment variables](#environment-variables)
+
+## steps
+For caddy there are no steps provided. 
 
 ## build arguments
 
@@ -16,8 +20,8 @@ Our base image additional includes
 ### Timezone
 - TZ
 
-_notice:<br/>
-Although caddy use TZ on runtime, we decided to provide the configuration in the base image.<br/>
+_Notice:_<br/>
+_Although caddy use TZ on runtime, we decided to provide the configuration in the base image.<br/>
 Our understanding of responsibility: developers are not responsible for the Timezone.<br/>But, it is also possible to set TZ via docker-compose.yml._
 
 ## compressed knowledge
@@ -28,7 +32,7 @@ In every case you have to define
 - **root (e.g. /var/app)**
 - **php_fastcgi (e.g. unix//socket/php.fpm)**
 
-_example:_ 
+_Example:_ 
 ```
 api.dev.demo.io {
     tls internal
@@ -38,7 +42,7 @@ api.dev.demo.io {
 }
 ```
 #### proxy via socket
-_example:_
+_Example:_
 ```
 api.dev.demo.io {
     tls internal
@@ -66,7 +70,7 @@ The webserver has to have access (network based) to the related service.<br/>
 ```
 php_fastcgi [container]:[port]
 ```
-_example:_
+_Example:_
 ```
 api.dev.demo.io {
     tls internal
@@ -81,10 +85,10 @@ services:
     webserver:
     php:
 ```
-### using environment variables
-caddy, out of the box, supports usage of environment arguments.
+### environment variables
+Caddy, out of the box, supports usage of environment arguments.
 
-_example:_
+_Example:_
 ```
 -------------------------------
 docker-compose.yml
