@@ -10,6 +10,9 @@ on:
         options:
           - '---choose---'
           - 'CADDY'
+          - 'MARIADB'
+          - 'NGINX'
+          - 'PHP-FPM'
 
 jobs:
   precondition:
