@@ -42,29 +42,3 @@ jobs:
           else
             echo "TAG ${IMAGE_TAG} for IMAGE ${IMAGE_NAME} does not exist"
           fi
-
-.build_and_push:
-    name: build and push to registry
-    runs-on: ubuntu-latest
-    needs: check-tag
-    steps:
-      - name: checkout source
-        uses: actions/checkout@v4
-
-      - name: log in to docker hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: read values from .env file
-        run: |
-          export $(grep -v '^#' .env | xargs -0)
-          echo "NAMESPACE=${DOCKER_NAMESPACE}" >> $GITHUB_ENV
-          echo "IMAGE_NAME=${CADDY_IMAGE_NAME}" >> $GITHUB_ENV
-          echo "IMAGE_TAG=${CADDY_IMAGE_TAG}" >> $GITHUB_ENV             
-
-      - name: build image and push
-        run: |
-          docker compose -f docker-compose.yml build --no-cache --force-rm ${{ env.SERVICE_NAME }}
-          docker image push ${{ env.NAMESPACE }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
