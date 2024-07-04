@@ -1,0 +1,8 @@
+    ###############################################################
+    # /favicon.ico from logs
+    location = /favicon.ico {
+        access_log      off;
+        log_not_found   off;
+# exclude
+#        return 204;
+    }

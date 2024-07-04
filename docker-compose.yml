@@ -1,0 +1,35 @@
+services:
+  caddy:
+    image: ${DOCKER_NAMESPACE}/${CADDY_IMAGE_NAME}:${CADDY_IMAGE_TAG}
+    build:
+      context: caddy
+      args:
+        IMAGE_NAME: ${CADDY_BUILD_ARG_IMAGE}
+        TIME_ZONE: ${TIME_ZONE}
+
+  nginx:
+    image: ${DOCKER_NAMESPACE}/${NGINX_IMAGE_NAME}:${NGINX_IMAGE_TAG}
+    build:
+      context: nginx
+      args:
+        IMAGE_NAME: ${NGINX_BUILD_ARG_IMAGE}
+        TIME_ZONE: ${TIME_ZONE}
+
+  mariadb:
+    image: ${DOCKER_NAMESPACE}/${MARIADB_IMAGE_NAME}:${MARIADB_IMAGE_TAG}
+    build:
+      context: mariadb
+      args:
+        IMAGE_NAME: ${MARIADB_BUILD_ARG_IMAGE}
+        TIME_ZONE: ${TIME_ZONE}
+
+  php:
+    image: ${DOCKER_NAMESPACE}/${PHP_IMAGE_NAME}:${PHP_IMAGE_TAG}
+    build:
+      context: php-fpm
+      args:
+        IMAGE_NAME: ${PHP_BUILD_ARG_IMAGE}
+        TIME_ZONE: ${TIME_ZONE}
+        WORK_DIR: ${PHP_BUILD_ARG_WORK_DIR}
+        WWW_LISTEN: ${PHP_BUILD_ARG_WWW_LISTEN}
+      target: production

@@ -1,0 +1,8 @@
+    ##############################################################
+    # Deny all attempts to access hidden files such as
+    # .htaccess, .htpasswd, .DS_Store (Mac).
+    location ~ /\. {
+        deny            all;
+        access_log      off;
+        log_not_found   off;
+    }

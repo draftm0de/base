@@ -1,0 +1,70 @@
+name: BaseImage - Caddy
+
+env:
+  SERVICE_NAME: caddy
+
+on:
+  workflow_dispatch:
+    inputs:
+      stage:
+        description: 'Choose build stage to run'
+        required: true
+        type: choice
+        options:
+          - '---choose---'
+          - 'Build and Push'
+
+jobs:
+  check-tag:
+    name: verify image tag
+    if: github.event.inputs.stage == 'Build and Push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+
+      - name: log in to docker hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: verify tag
+        run: |
+          export $(grep -v '^#' .env | xargs -0)
+          echo "NAMESPACE=${DOCKER_NAMESPACE}" >> $GITHUB_ENV
+          echo "IMAGE_NAME=${CADDY_IMAGE_NAME}" >> $GITHUB_ENV
+          echo "IMAGE_TAG=${CADDY_IMAGE_TAG}" >> $GITHUB_ENV
+          TAG_EXISTS=$(curl -s -o /dev/null -w "%{http_code}" https://hub.docker.com/v2/repositories/${NAMESPACE}/${IMAGE_NAME}/tags/${IMAGE_TAG})
+          if [ "$TAG_EXISTS" -eq "200" ]; then
+            echo "TAG ${IMAGE_TAG} for IMAGE ${IMAGE_NAME} already exists"
+            exit 1
+          else
+            echo "TAG ${IMAGE_TAG} for IMAGE ${IMAGE_NAME} does not exist"
+          fi
+
+.build_and_push:
+    name: build and push to registry
+    runs-on: ubuntu-latest
+    needs: check-tag
+    steps:
+      - name: checkout source
+        uses: actions/checkout@v4
+
+      - name: log in to docker hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: read values from .env file
+        run: |
+          export $(grep -v '^#' .env | xargs -0)
+          echo "NAMESPACE=${DOCKER_NAMESPACE}" >> $GITHUB_ENV
+          echo "IMAGE_NAME=${CADDY_IMAGE_NAME}" >> $GITHUB_ENV
+          echo "IMAGE_TAG=${CADDY_IMAGE_TAG}" >> $GITHUB_ENV             
+
+      - name: build image and push
+        run: |
+          docker compose -f docker-compose.yml build --no-cache --force-rm ${{ env.SERVICE_NAME }}
+          docker image push ${{ env.NAMESPACE }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}

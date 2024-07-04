@@ -1,0 +1,9 @@
+{
+	log {
+		output stdout
+		level {$LOG_LEVEL:ERROR}
+		format {$LOG_FORMAT:json}
+	}
+}
+
+import sites-enabled/*
