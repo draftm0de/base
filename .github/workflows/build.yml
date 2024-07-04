@@ -18,7 +18,7 @@ jobs:
     outputs:
       files_exist: ${{ steps.check_files.outputs.files_exist }}
     steps:
-      - name: checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
       - name: Check for .env and docker-compose.yml
@@ -29,7 +29,7 @@ jobs:
           
           for file in "${files[@]}"; do
             if [ ! -f "$file" ]; then
-              echo "required file $file does not exist"
+              echo "$file does not exist"
               file_exists=false
               break
             fi
@@ -48,23 +48,21 @@ jobs:
     needs: precondition
     if: needs.precondition.outputs.files_exist == 'true'
     steps:
-      - name: checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: log in to docker hub
+      - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Approve give tag does not exist
+      - name: Approve if tag does not exist
         run: |
-          # Ensource .env
           set -o allexport
           source .env
           set +o allexport
           
-          # Dynamically set IMAGE_NAME and IMAGE_TAG based on input stage
           STAGE="${{ github.event.inputs.stage }}"
           IMAGE_NAME_VAR="${STAGE}_IMAGE_NAME"
           IMAGE_TAG_VAR="${STAGE}_IMAGE_TAG"
@@ -72,12 +70,15 @@ jobs:
           IMAGE_NAME="${!IMAGE_NAME_VAR}"
           IMAGE_TAG="${!IMAGE_TAG_VAR}"
           
-          TAG_EXISTS=$(curl -s -o /dev/null -w "%{http_code}" https://hub.docker.com/v2/repositories/${DOCKER_NAMESPACE}/${IMAGE_NAME}/tags/${IMAGE_TAG})
+          IMAGE_NAME_LOWER=$(echo "$IMAGE_NAME" | tr '[:upper:]' '[:lower:]')
+          
+          TAG_EXISTS=$(curl -s -o /dev/null -w "%{http_code}" https://hub.docker.com/v2/repositories/${DOCKER_NAMESPACE}/${IMAGE_NAME_LOWER}/tags/${IMAGE_TAG})
+          
           if [ "$TAG_EXISTS" -eq "200" ]; then
-            echo "TAG ${IMAGE_TAG} for IMAGE ${IMAGE_NAME} already exists"
+            echo "TAG ${IMAGE_TAG} for IMAGE ${IMAGE_NAME_LOWER} already exists"
             exit 1
           else
-            echo "TAG ${IMAGE_TAG} for IMAGE ${IMAGE_NAME} does not exist"
+            echo "TAG ${IMAGE_TAG} for IMAGE ${IMAGE_NAME_LOWER} does not exist"
           fi
 
   build_and_push:
@@ -95,14 +96,12 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: build image and push
+      - name: Build and Push Docker Image
         run: |
-          # Ensource .env
           set -o allexport
           source .env
           set +o allexport
           
-          # Dynamically set IMAGE_NAME and IMAGE_TAG based on input stage
           STAGE="${{ github.event.inputs.stage }}"
           STAGE_LOWER=$(echo "$STAGE" | tr '[:upper:]' '[:lower:]')
           IMAGE_NAME_VAR="${STAGE}_IMAGE_NAME"
@@ -115,9 +114,6 @@ jobs:
           
           echo "Building Docker image..."
           docker compose -f docker-compose.yml build --no-cache --force-rm ${STAGE_LOWER}
-          
-          echo "Logging into Docker Hub..."
-          docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
           
           echo "Tagging Docker image..."
           docker tag ${STAGE_LOWER} ${DOCKER_NAMESPACE}/${IMAGE_NAME_LOWER}:${IMAGE_TAG}
