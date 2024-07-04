@@ -35,10 +35,10 @@ jobs:
           echo "NAMESPACE=${DOCKER_NAMESPACE}" >> $GITHUB_ENV
           echo "IMAGE_NAME=${CADDY_IMAGE_NAME}" >> $GITHUB_ENV
           echo "IMAGE_TAG=${CADDY_IMAGE_TAG}" >> $GITHUB_ENV
-          TAG_EXISTS=$(curl -s -o /dev/null -w "%{http_code}" https://hub.docker.com/v2/repositories/${NAMESPACE}/${IMAGE_NAME}/tags/${IMAGE_TAG})
+          TAG_EXISTS=$(curl -s -o /dev/null -w "%{http_code}" https://hub.docker.com/v2/repositories/${{ env.NAMESPACE }}/${{ env.IMAGE_NAME }}/tags/${{ env.IMAGE_TAG }})
           if [ "$TAG_EXISTS" -eq "200" ]; then
-            echo "TAG ${IMAGE_TAG} for IMAGE ${IMAGE_NAME} already exists"
+            echo "TAG ${{ env.IMAGE_TAG }} for IMAGE ${{ env.IMAGE_NAME }} already exists"
             exit 1
           else
-            echo "TAG ${IMAGE_TAG} for IMAGE ${IMAGE_NAME} does not exist"
+            echo "TAG ${{ env.IMAGE_TAG }} for IMAGE ${{ env.IMAGE_NAME }} does not exist"
           fi
