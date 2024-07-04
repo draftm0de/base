@@ -12,7 +12,7 @@ on:
           - 'CADDY'
           - 'MARIADB'
           - 'NGINX'
-          - 'PHP-FPM'
+          - 'PHP'
 
 jobs:
   check-files:
