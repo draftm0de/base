@@ -67,10 +67,10 @@ jobs:
           IMAGE_NAME_LOWER=$(echo "$IMAGE_NAME" | tr '[:upper:]' '[:lower:]')
           
           if docker manifest inspect ${DOCKER_NAMESPACE}/${IMAGE_NAME_LOWER}:${IMAGE_TAG} > /dev/null 2>&1; then
-            echo "[E] TAG ${IMAGE_TAG} for IMAGE ${IMAGE_NAME_LOWER} already exists"
+            echo "[E] TAG ${IMAGE_TAG} for IMAGE ${DOCKER_NAMESPACE}/${IMAGE_NAME_LOWER} already exists"
             exit 1
           else            
-            echo "[I] TAG ${IMAGE_TAG} for IMAGE ${IMAGE_NAME_LOWER} does not exist"
+            echo "[I] TAG ${IMAGE_TAG} for IMAGE ${DOCKER_NAMESPACE}/${IMAGE_NAME_LOWER} does not exist"
           fi
 
   build_and_push:
