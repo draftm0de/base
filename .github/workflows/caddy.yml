@@ -1,7 +1,4 @@
-name: BaseImage - Caddy
-
-env:
-  SERVICE_NAME: caddy
+name: BaseImage Builder
 
 on:
   workflow_dispatch:
@@ -12,12 +9,11 @@ on:
         type: choice
         options:
           - '---choose---'
-          - 'Build and Push'
+          - 'CADDY'
 
 jobs:
   check-tag:
     name: verify image tag
-    if: github.event.inputs.stage == 'Build and Push'
     runs-on: ubuntu-latest
     steps:
       - name: checkout repository
@@ -31,39 +27,17 @@ jobs:
 
       - name: verify tag
         run: |
-          export $(grep -v '^#' .env | xargs -0)
-          echo "NAMESPACE=${DOCKER_NAMESPACE}" >> $GITHUB_ENV
-          echo "IMAGE_NAME=${CADDY_IMAGE_NAME}" >> $GITHUB_ENV
-          echo "IMAGE_TAG=${CADDY_IMAGE_TAG}" >> $GITHUB_ENV
-          TAG_EXISTS=$(curl -s -o /dev/null -w "%{http_code}" https://hub.docker.com/v2/repositories/${{ env.NAMESPACE }}/${{ env.IMAGE_NAME }}/tags/${{ env.IMAGE_TAG }})
+          set -o allexport
+          source .env
+          set +o allexport
+          D_IMAGE_NAME="${ env.inputs.stag }_IMAGE_NAME"
+          eval IMAGE_NAME=\$D_IMAGE_NAME
+          D_IMAGE_TAG="${ env.inputs.stag }_IMAGE_NAME"
+          eval IMAGE_TAG=\$D_IMAGE_TAG
+          TAG_EXISTS=$(curl -s -o /dev/null -w "%{http_code}" https://hub.docker.com/v2/repositories/${DOCKER_NAMESPACE}/${{ IMAGE_NAME }}/tags/${{ IMAGE_TAG }})
           if [ "$TAG_EXISTS" -eq "200" ]; then
-            echo "TAG ${{ env.IMAGE_TAG }} for IMAGE ${{ env.IMAGE_NAME }} already exists"
+            echo "TAG ${{ IMAGE_TAG }} for IMAGE ${{ IMAGE_NAME }} already exists"
             exit 1
           else
-            echo "TAG ${{ env.IMAGE_TAG }} for IMAGE ${{ env.IMAGE_NAME }} does not exist"
+            echo "TAG ${{ IMAGE_TAG }} for IMAGE ${{ IMAGE_NAME }} does not exist"
           fi
-  build_and_push:
-    name: build and push to registry
-    runs-on: ubuntu-latest
-    needs: check-tag
-    steps:
-      - name: checkout source
-        uses: actions/checkout@v4
-
-      - name: log in to docker hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: read values from .env file
-        run: |
-          export $(grep -v '^#' .env | xargs -0)
-          echo "NAMESPACE=${DOCKER_NAMESPACE}" >> $GITHUB_ENV
-          echo "IMAGE_NAME=${CADDY_IMAGE_NAME}" >> $GITHUB_ENV
-          echo "IMAGE_TAG=${CADDY_IMAGE_TAG}" >> $GITHUB_ENV             
-
-      - name: build image and push
-        run: |
-          docker compose -f docker-compose.yml build --no-cache --force-rm ${{ env.SERVICE_NAME }}
-          docker image push ${{ env.NAMESPACE }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
