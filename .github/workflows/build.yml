@@ -27,7 +27,7 @@ jobs:
       - name: Check for .env and docker-compose.yml
         id: check_files
         run: |
-          files=(.env docker-compose.yml demo.txt)
+          files=(.env docker-compose.yml)
           file_exists=true
           
           for file in "${files[@]}"; do
@@ -35,7 +35,6 @@ jobs:
               echo "[I] required file <$file> exist"
             else
               echo "[E] required file <$file> does not exist"
-              file_exists=false
               exit 1
             fi
           done
@@ -73,13 +72,11 @@ jobs:
           
           IMAGE_NAME_LOWER=$(echo "$IMAGE_NAME" | tr '[:upper:]' '[:lower:]')
           
-          tag_exist=true          
           if docker manifest inspect ${DOCKER_NAMESPACE}/${IMAGE_NAME_LOWER}:${IMAGE_TAG} > /dev/null >&1; then
-            echo "tag_exist=true" >> $GITHUB_ENV
             echo "[E] TAG ${IMAGE_TAG} for IMAGE ${IMAGE_NAME_LOWER} already exists"
             exit 1
           else
-            echo "tag_exist=true" >> $GITHUB_ENV
+            tag_exists=true          
             echo "[I] TAG ${IMAGE_TAG} for IMAGE ${IMAGE_NAME_LOWER} does not exist"
           fi
 
