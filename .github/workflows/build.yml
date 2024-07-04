@@ -75,7 +75,7 @@ jobs:
           
           IMAGE_NAME_LOWER=$(echo "$IMAGE_NAME" | tr '[:upper:]' '[:lower:]')
           
-          TAG_EXISTS=$(curl -s -o /dev/null -w "%{http_code}" https://hub.docker.com/v2/repositories/${DOCKER_NAMESPACE}/${IMAGE_NAME_LOWER}/tags/${IMAGE_TAG})
+          TAG_EXISTS=$(curl -s -o /dev/null -w "%{http_code}" -u "${{ secrets.DOCKERHUB_USERNAME }}:${{ secrets.DOCKERHUB_TOKEN }}" "https://index.docker.io/v2/${DOCKER_NAMESPACE}/${IMAGE_NAME}/manifests/${IMAGE_TAG}")
           
           if [ "$TAG_EXISTS" -eq "200" ]; then
             echo "TAG ${IMAGE_TAG} for IMAGE ${IMAGE_NAME_LOWER} already exists"
