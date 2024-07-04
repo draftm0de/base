@@ -39,7 +39,7 @@ jobs:
           done
           
           files_exist=true
-          # echo "files_exist=true" >> $GITHUB_ENV
+          echo "files_exist=true" >> $GITHUB_ENV
 
   check-tag:
     name: Verify Image Tag
@@ -81,8 +81,8 @@ jobs:
             echo "[I] TAG ${IMAGE_TAG} for IMAGE ${IMAGE_NAME_LOWER} does not exist"
           fi
 
-          tag_exists=false          
-          # echo "tag_exists=false" >> $GITHUB_ENV                              
+          tag_exists=false     
+          echo "tag_exists=false" >> $GITHUB_ENV                              
 
   build_and_push:
     name: Build and Push to Registry
