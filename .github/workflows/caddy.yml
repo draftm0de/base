@@ -11,4 +11,4 @@ jobs:
         run: echo "STAGE=CADDY" >> $GITHUB_ENV
 
       - name: Run Shared Steps
-        uses: ./.github/templates/workflow.yml
+        uses: ./.github/workflows/deployment.yml
