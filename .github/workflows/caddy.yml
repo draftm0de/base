@@ -30,14 +30,22 @@ jobs:
           set -o allexport
           source .env
           set +o allexport
-          D_IMAGE_NAME="${ env.inputs.stag }_IMAGE_NAME"
-          eval IMAGE_NAME=\$D_IMAGE_NAME
-          D_IMAGE_TAG="${ env.inputs.stag }_IMAGE_NAME"
-          eval IMAGE_TAG=\$D_IMAGE_TAG
-          TAG_EXISTS=$(curl -s -o /dev/null -w "%{http_code}" https://hub.docker.com/v2/repositories/${DOCKER_NAMESPACE}/${{ IMAGE_NAME }}/tags/${{ IMAGE_TAG }})
+          
+          # Dynamically set IMAGE_NAME and IMAGE_TAG based on input stage
+          STAGE="${{ github.event.inputs.stage }}"
+          IMAGE_NAME_VAR="${STAGE}_IMAGE_NAME"
+          IMAGE_TAG_VAR="${STAGE}_IMAGE_TAG"
+          
+          IMAGE_NAME="${!IMAGE_NAME_VAR}"
+          IMAGE_TAG="${!IMAGE_TAG_VAR}"
+          
+          echo "Using IMAGE_NAME: $IMAGE_NAME"
+          echo "Using IMAGE_TAG: $IMAGE_TAG"
+          
+          TAG_EXISTS=$(curl -s -o /dev/null -w "%{http_code}" https://hub.docker.com/v2/repositories/${DOCKER_NAMESPACE}/${IMAGE_NAME}/tags/${IMAGE_TAG})
           if [ "$TAG_EXISTS" -eq "200" ]; then
-            echo "TAG ${{ IMAGE_TAG }} for IMAGE ${{ IMAGE_NAME }} already exists"
+            echo "TAG ${IMAGE_TAG} for IMAGE ${IMAGE_NAME} already exists"
             exit 1
           else
-            echo "TAG ${{ IMAGE_TAG }} for IMAGE ${{ IMAGE_NAME }} does not exist"
+            echo "TAG ${IMAGE_TAG} for IMAGE ${IMAGE_NAME} does not exist"
           fi
