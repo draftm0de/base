@@ -39,13 +39,6 @@ jobs:
               exit 1
             fi
           done
-          
-          if [ "$file_exists" = false ]; then
-            echo "files_exist=false" >> $GITHUB_ENV
-            exit 1
-          else
-            echo "files_exist=true" >> $GITHUB_ENV
-          fi
 
   check-tag:
     name: Verify Image Tag
