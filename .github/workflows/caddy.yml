@@ -6,7 +6,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    needs: BaseImage Builder
     steps:
       - name: Set STAGE Environment Variable
         run: echo "STAGE=CADDY" >> $GITHUB_ENV
