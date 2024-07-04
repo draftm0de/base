@@ -57,7 +57,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Approve if tag does not exist
+      - name: Verify Tag Existence
         id: check-tag
         run: |
           set -o allexport
@@ -73,13 +73,13 @@ jobs:
           
           IMAGE_NAME_LOWER=$(echo "$IMAGE_NAME" | tr '[:upper:]' '[:lower:]')
           
-          if docker manifest inspect ${DOCKER_NAMESPACE}/${IMAGE_NAME_LOWER}:${IMAGE_TAG} > /dev/null >&1; then
+          if docker manifest inspect ${DOCKER_NAMESPACE}/${IMAGE_NAME_LOWER}:${IMAGE_TAG} > /dev/null 2>&1; then
             echo "[E] TAG ${IMAGE_TAG} for IMAGE ${IMAGE_NAME_LOWER} already exists"
-            exit 1
+            echo "tag_exists=true" >> $GITHUB_ENV
           else            
             echo "[I] TAG ${IMAGE_TAG} for IMAGE ${IMAGE_NAME_LOWER} does not exist"
+            echo "tag_exists=false" >> $GITHUB_ENV
           fi
-          echo "tag_exists=false" >> $GITHUB_ENV              
 
   build_and_push:
     name: Build and Push to Registry
@@ -114,9 +114,6 @@ jobs:
           
           echo "Building Docker image..."
           docker compose -f docker-compose.yml build --no-cache --force-rm ${STAGE_LOWER}
-          
-          # echo "Tagging Docker image..."
-          # docker tag ${STAGE_LOWER} ${DOCKER_NAMESPACE}/${IMAGE_NAME_LOWER}:${IMAGE_TAG}
           
           echo "Pushing Docker image to Docker Hub..."
           docker image push ${DOCKER_NAMESPACE}/${IMAGE_NAME_LOWER}:${IMAGE_TAG}
