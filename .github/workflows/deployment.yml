@@ -2,6 +2,17 @@ name: BaseImage Builder
 
 on:
   workflow_dispatch:
+    inputs:
+      stage:
+        description: 'Choose BaseImage to be created'
+        required: true
+        type: choice
+        options:
+          - '---choose---'
+          - 'CADDY'
+          - 'MARIADB'
+          - 'NGINX'
+          - 'PHP'
 
 jobs:
   check-files:
@@ -46,6 +57,7 @@ jobs:
           source .env
           set +o allexport
           
+          STAGE="${{ github.event.inputs.stage }}"
           IMAGE_NAME_VAR="${STAGE}_IMAGE_NAME"
           IMAGE_TAG_VAR="${STAGE}_IMAGE_TAG"
           
@@ -81,6 +93,7 @@ jobs:
           source .env
           set +o allexport
           
+          STAGE="${{ github.event.inputs.stage }}"
           STAGE_LOWER=$(echo "$STAGE" | tr '[:upper:]' '[:lower:]')
           IMAGE_NAME_VAR="${STAGE}_IMAGE_NAME"
           IMAGE_TAG_VAR="${STAGE}_IMAGE_TAG"
