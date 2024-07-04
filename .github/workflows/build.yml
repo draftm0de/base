@@ -118,8 +118,8 @@ jobs:
           echo "Building Docker image..."
           docker compose -f docker-compose.yml build --no-cache --force-rm ${STAGE_LOWER}
           
-          echo "Tagging Docker image..."
-          docker tag ${STAGE_LOWER} ${DOCKER_NAMESPACE}/${IMAGE_NAME_LOWER}:${IMAGE_TAG}
+          # echo "Tagging Docker image..."
+          # docker tag ${STAGE_LOWER} ${DOCKER_NAMESPACE}/${IMAGE_NAME_LOWER}:${IMAGE_TAG}
           
           echo "Pushing Docker image to Docker Hub..."
-          docker push ${DOCKER_NAMESPACE}/${IMAGE_NAME_LOWER}:${IMAGE_TAG}
+          docker image push ${DOCKER_NAMESPACE}/${IMAGE_NAME_LOWER}:${IMAGE_TAG}
