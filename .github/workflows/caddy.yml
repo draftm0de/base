@@ -7,9 +7,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
       - name: Set STAGE Environment Variable
         run: echo "STAGE=CADDY" >> $GITHUB_ENV
 
