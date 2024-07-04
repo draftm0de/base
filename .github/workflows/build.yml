@@ -15,7 +15,7 @@ on:
           - 'PHP-FPM'
 
 jobs:
-  precondition:
+  file_exists:
     name: Check Required Files
     runs-on: ubuntu-latest
     outputs:
@@ -27,12 +27,12 @@ jobs:
       - name: Check for .env and docker-compose.yml
         id: check_files
         run: |
-          files=(.env docker-compose.yml)
+          files=(.env docker-compose.yml demo.io)
           file_exists=true
           
           for file in "${files[@]}"; do
             if [ ! -f "$file" ]; then
-              echo "$file does not exist"
+              echo "required file $file does not exist"
               file_exists=false
               break
             fi
@@ -48,8 +48,10 @@ jobs:
   check-tag:
     name: Verify Image Tag
     runs-on: ubuntu-latest
+    outputs:
+      tag_exists: ${{ steps.check_tag.outputs.tag_exists }}
     needs: precondition
-#    if: needs.precondition.outputs.files_exist == 'true'
+    if: needs.precondition.outputs.files_exist == 'true'
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -61,6 +63,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Approve if tag does not exist
+        id: check_tag
         run: |
           set -o allexport
           source .env
@@ -75,6 +78,7 @@ jobs:
           
           IMAGE_NAME_LOWER=$(echo "$IMAGE_NAME" | tr '[:upper:]' '[:lower:]')
           
+          tag_exist=true          
           if docker manifest inspect ${DOCKER_NAMESPACE}/${IMAGE_NAME_LOWER}:${IMAGE_TAG} > /dev/null >&1; then
             echo "tag_exist=true" >> $GITHUB_ENV
             echo "TAG ${IMAGE_TAG} for IMAGE ${IMAGE_NAME_LOWER} already exists"
