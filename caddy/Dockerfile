@@ -9,7 +9,9 @@ ENV APK_ADD \
     nss-tools \
     curl
 
+ENV SITES_ENABLED_PATH="/etc/caddy/sites-enabled"
+
 RUN apk add --update --no-cache ${APK_ADD} \
- && mkdir /etc/caddy/sites-enabled
+ && mkdir ${SITES_ENABLED_PATH}
 
 COPY /etc/caddy/Caddyfile /etc/caddy/Caddyfile

@@ -2,13 +2,31 @@
 official page: https://caddyserver.com/
 
 1. [steps](#steps)
-2. [arguments](#build-arguments)
-3. [compressed knowledge](#compressed-knowledge)
+2. [provided ENVs](#provided-envs)
+3. [arguments](#build-arguments)
+4. [compressed knowledge](#compressed-knowledge)
    1. [php fpm](#php-fpm-fastcgi)
    2. [environment variables](#environment-variables)
 
 ## steps
 For caddy there are no steps provided. 
+
+## provided ENVs
+Dockerfiles using this base image can reuse given ENVs.
+```
+FROM draftmode/base.caddy:1.0.1
+
+ARG SITES_ENABLED_PATH
+COPY (your source folder) $SITES_ENABLED_PATH
+```
+
+### SITES_ENABLED_PATH
+Our Caddyfile includes hosts configuration files. Comparable with nginx site-enabled.
+```
+import sites-enabled/*
+```
+The target PATH is delivered as an ENV SITES_ENABLED_PATH="/etc/caddy/sites-enabled"
+
 
 ## build arguments
 
