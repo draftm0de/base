@@ -2,7 +2,7 @@
 official page: https://caddyserver.com/
 
 1. [steps](#steps)
-2. [provided environment arguments](#provided-envs)
+2. [provided environment arguments](#provided-environment-arguments)
 3. [arguments](#build-arguments)
 4. [compressed knowledge](#compressed-knowledge)
    1. [php fpm](#php-fpm-fastcgi)
@@ -14,6 +14,18 @@ For caddy there are no steps provided.
 ## provided environment arguments
 Dockerfiles using this base image can reuse already provided ENV variables.
 
+_docker-compose(.override).yml:_<br/>
+**keep in mind that ENV variables provided in the base image cannot be used in a docker-compose(.override).yml context.**
+
+### SITES_ENABLED_PATH
+Our Caddyfile ``/etc/caddy/Caddyfile`` includes all host configuration files by importing all files in sites-enabled folder.<br/>
+_The method is comparable with nginx site-enabled._<br/>
+```
+import sites-enabled/*
+```
+
+The target PATH is delivered as an ENV SITES_ENABLED_PATH="/etc/caddy/sites-enabled"
+#### Dockerfile
 _Example:_
 ```
 FROM draftmode/base.caddy:1.0.0
@@ -21,16 +33,12 @@ FROM draftmode/base.caddy:1.0.0
 ARG SITES_ENABLED_PATH
 COPY (your source folder) $SITES_ENABLED_PATH
 ```
-
-### SITES_ENABLED_PATH
-Our Caddyfile
+#### docker-compose.override.yml
+_Example:_
 ```
-import sites-enabled/*
+   volumes:
+      - ./proxy/etc/caddy/sites-enabled/dev:/etc/caddy/sites-enabled
 ```
-includes all host configuration files by importing all files in sites-enabled folder.<br/>
-_The method is comparable with nginx site-enabled._<br/>
-
-The target PATH is delivered as an ENV SITES_ENABLED_PATH="/etc/caddy/sites-enabled"
 
 ## build arguments
 
