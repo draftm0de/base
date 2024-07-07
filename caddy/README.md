@@ -9,8 +9,10 @@ official page: https://caddyserver.com/
    5. [build arguments](#build-arguments)
    6. [reserved ENV(s)](#reserved-envs)
 2. [FAQ](#faq)
-   1. [php fpm (fastcgi)](#php-fpm-fastcgi)
-   2. [environment variables](#environment-variables)
+   1. [reload](#reload)
+   2. [reverse proxy](#reverse-proxy)
+   3. [php fpm (fastcgi)](#php-fpm-fastcgi)
+   4. [environment variables](#environment-variables)
 
 ## Dockerfile
 ### included packages
@@ -72,6 +74,42 @@ _running image via docker compose_
 ```
 docker compose exec <container> caddy reload -c /etc/caddy/Caddyfile
 ```
+### reverse proxy
+#### implemented via docker compose 
+When using caddy as a reverse proxy to another webserver (e.g. nginx based) there are **two things you have to know/share/determine**.
+
+(1) the service you want to be addressed has to be in the **same network**<br/>
+(2) the **service name** you want to address to has to be known by the proxy 
+- docker-compose.yml (proxy)
+  ```
+  services:
+      proxy:
+          networks:
+              - proxy
+                
+  networks:
+      proxy:
+          name: proxy
+  ```
+- docker-compose.yml (other webserver)
+  ```
+  services:
+      webserver:
+          container_name: containertobeaddressed
+          networks:
+              - proxy
+                
+  networks:
+      proxy:
+          external: true
+  ```
+- caddy config<br/>
+_(stored in /etc/caddy/sites-enabled/draftmode.io)_
+    ```
+    www.draftmode.io {
+        reverse_proxy / http://containertobeaddressed
+    }
+    ```
 ### php fpm (fastcgi)
 [Documentation](https://caddyserver.com/docs/caddyfile/directives/php_fastcgi)
 
