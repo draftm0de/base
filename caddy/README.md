@@ -1,60 +1,69 @@
 # caddy webserver
 official page: https://caddyserver.com/
 
-1. [steps](#steps)
-2. [provided environment arguments](#provided-environment-arguments)
-3. [arguments](#build-arguments)
-4. [compressed knowledge](#compressed-knowledge)
-   1. [php fpm](#php-fpm-fastcgi)
+1. [Dockerfile](#dockerfile)
+   1. [included packages](#included-packages)
+   2. [prepared folder](#prepared-folder)
+   3. [prepared files](#prepared-files)
+   4. [steps/targets](#stepstargets)
+   5. [build arguments](#build-arguments)
+   6. [reserved ENV(s)](#reserved-envs)
+2. [FAQ](#faq)
+   1. [php fpm (fastcgi)](#php-fpm-fastcgi)
    2. [environment variables](#environment-variables)
 
-## steps
-For caddy there are no steps provided. 
+## Dockerfile
+### included packages
+- tzdata
+- nss-tools
+- curl
 
-## provided environment arguments
+### prepared folder
+- /etc/caddy/sites-enabled<br/>
+_our CaddyFile import all files stored in this folder. We recommend to have, for each domain, a separate file within his server directives._<br/>
+
+### prepared files
+- /etc/caddy/Caddyfile 
+  - log
+    - output => stdout 
+    - level => ${LOG_LEVEL:ERROR}
+    - format => ${LOG_FORMAT:json}
+  - directive: import sites-enabled/*
+
+### steps/targets
+There are no steps provided.
+
+### build arguments
+- TIME_ZONE<br/>
+_These argument is forwarded a ENV TZ to caddy (e.g. "Europe/Vienna"). 
+Although caddy use TZ on runtime, we decided to provide this configuration in the base image._
+
+### reserved ENV(s)
 Dockerfiles using this base image can reuse already provided ENV variables.
 
-_docker-compose(.override).yml:_<br/>
-**keep in mind that ENV variables provided in the base image cannot be used in a docker-compose(.override).yml context.**
+- **SITES_ENABLED_PATH**<br/>
+_Our Caddyfile ``/etc/caddy/Caddyfile`` imports all files stored in /sites-enabled folder._
 
-### SITES_ENABLED_PATH
-Our Caddyfile ``/etc/caddy/Caddyfile`` includes all host configuration files by importing all files in sites-enabled folder.<br/>
-_The method is comparable with nginx site-enabled._<br/>
 ```
 import sites-enabled/*
 ```
 
-The target PATH is delivered as an ENV SITES_ENABLED_PATH="/etc/caddy/sites-enabled"
-#### Dockerfile
-_Example:_
+The PATH is delivered as an ENV SITES_ENABLED_PATH="/etc/caddy/sites-enabled"
+
+**Dockerfile (Example)**
 ```
 FROM draftmode/base.caddy:1.0.0
 
 ARG SITES_ENABLED_PATH
 COPY (your source folder) $SITES_ENABLED_PATH
 ```
-#### docker-compose.override.yml
-_Example:_
+**docker-compose.override.yml (Example)**
 ```
    volumes:
       - ./proxy/etc/caddy/sites-enabled/dev:/etc/caddy/sites-enabled
 ```
 
-## build arguments
-
-Our base image additional includes
-- tzdata _(required to set up time zone)_
-- nss-tools _(required to create ssl certificates)_
-- curl
-
-### Timezone
-- TZ
-
-_Notice:_<br/>
-_Although caddy use TZ on runtime, we decided to provide the configuration in the base image.<br/>
-Our understanding of responsibility: developers are not responsible for the Timezone.<br/>But, it is also possible to set TZ via docker-compose.yml._
-
-## compressed knowledge
+## FAQ
 ### php fpm (fastcgi)
 [Documentation](https://caddyserver.com/docs/caddyfile/directives/php_fastcgi)
 
