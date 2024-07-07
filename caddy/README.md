@@ -23,7 +23,7 @@ official page: https://caddyserver.com/
 _our CaddyFile import all files stored in this folder. We recommend to have, for each domain, a separate file within his server directives._<br/>
 
 ### prepared files
-- /etc/caddy/Caddyfile 
+#### /etc/caddy/Caddyfile 
   - log
     - output => stdout 
     - level => ${LOG_LEVEL:ERROR}
@@ -41,7 +41,10 @@ Although caddy use TZ on runtime, we decided to provide this configuration in th
 ### reserved ENV(s)
 Dockerfiles using this base image can reuse already provided ENV variables.
 
-- **SITES_ENABLED_PATH**<br/>
+**TZ**<br/>
+_As mentioned, used to set a TZ for caddy._
+
+**SITES_ENABLED_PATH**<br/>
 _Our Caddyfile ``/etc/caddy/Caddyfile`` imports all files stored in /sites-enabled folder._
 
 ```

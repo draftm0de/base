@@ -1,32 +1,26 @@
 # nginx webserver
 official page: https://nginx.org/en/docs/
 
-1. [steps](#steps)
-2. [build arguments](#build-arguments)
-3. [extensions](#extensions)
-4. [compressed knowledge](#compressed-knowledge)
-   1. [php fpm](#php-fpm-fastcgi)
+1. [Dockerfile](#dockerfile)
+   1. [included packages](#included-packages)
+   2. [prepared folder](#prepared-folder)
+   3. [prepared files](#prepared-files)
+   4. [steps/targets](#stepstargets)
+   5. [build arguments](#build-arguments)
+   6. [reserved ENV(s)](#reserved-envs)
+2. [FAQ](#faq)
+   1. [php fpm (fastcgi)](#php-fpm-fastcgi)
    2. [nginx templates](#nginx-templates)
 
-## steps
-For mariadb there are no steps provided.
-
-## build arguments
-
-Our base image additional includes
-- tzdata _(required to set up time zone)_
+## Dockerfile
+### included packages
 - bash
 - nano
+- tzdata
 
-## extensions
-in /etc/nginx/custom we provide a couple of conf/locations.
-
-### deny.dotfolder.location
-All . folders are denied.<br/>
-
-_Notice_<br/>
-_Take care about .well_known(*) folders. They are also exclude!_
-
+### prepared folder
+- **/etc/nginx/custom**<br/>
+_In this folder we provide a couple of conf and locations directives._
 _Example:_
 ```
 server {
@@ -34,27 +28,20 @@ server {
 }
 ```
 
-### disable.robots.location
+### prepared files
+#### deny.dotfolder.location
+All . (DOT) folders are denied.<br/>
+
+_Notice_<br/>
+_Take care about .well_known(*) folders. They are also exclude!_
+
+#### disable.robots.location
 /robots.txt cannot be accessed.
 
-_Example:_
-```
-server {
-   include custom/disable.robots.location;
-}
-```
-
-### ignore.favicon.location
+#### ignore.favicon.location
 /favicon.ico does not return a 404 if not present.
 
-_Example:_
-```
-server {
-   include custom/ignore.favicon.location;
-}
-```
-
-### proxy.conf
+#### proxy.conf
 Common location extension when using a proxy directive
 
 _Example:_
@@ -67,7 +54,7 @@ server {
 }
 ```
 
-### resolver.conf
+#### resolver.conf
 Add the default resolve for docker (127.0.0.11)
 
 _Example:_
@@ -75,12 +62,11 @@ _Example:_
 server {
    location / {
       include custom/resolver.conf;
-       
+      ...
    }   
 }
 ```
-
-### ssl.conf
+#### ssl.conf
 When using any SSL communication, it's recommended to use these snippets, too.
 
 _Example:_
@@ -95,10 +81,19 @@ server {
 }
 ```
 
-### Timezone
-- TZ
+### steps/targets
+There are no steps provided.
 
-## compressed knowledge
+### build arguments
+- TIME_ZONE<br/>
+  _These argument is forwarded a ENV TZ to nginx (e.g. "Europe/Vienna").
+  Although caddy use TZ on runtime, we decided to provide this configuration in the base image._
+
+### reserved ENV(s)
+**TZ**<br/>
+_As mentioned, used to set a TZ for nginx._
+
+## FAQ
 ### php fpm (fastcgi)
 
 In every case you have to define
@@ -189,5 +184,4 @@ server {
   root my/root/folder;
 }
 ```
-#### changing the template
-Changing the template files requires a new docker-compose up, cause the magic happens via docker-entrypoint(s).
+_Changing the template files requires a new docker-compose up, cause the magic happens via docker-entrypoint(s)._
