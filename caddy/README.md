@@ -67,6 +67,11 @@ COPY (your source folder) $SITES_ENABLED_PATH
 ```
 
 ## FAQ
+### reload
+_running image via docker compose_
+```
+docker compose exec <container> caddy reload -c /etc/caddy/Caddyfile
+```
 ### php fpm (fastcgi)
 [Documentation](https://caddyserver.com/docs/caddyfile/directives/php_fastcgi)
 
