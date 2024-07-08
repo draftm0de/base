@@ -33,7 +33,7 @@ server {
 All . (DOT) folders are denied.<br/>
 
 _Notice_<br/>
-_Take care about .well_known(*) folders. They are also exclude!_
+_Take care about .well_known(*) folders. They are exclude, too!_
 
 #### disable.robots.location
 /robots.txt cannot be accessed.
